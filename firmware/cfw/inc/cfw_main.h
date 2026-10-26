@@ -10,7 +10,6 @@ void cfw_main(void);
 
 /* CFW feature stubs */
 void cfw_usb_stub(void);
-void cfw_hold_trigger(void);
 void cfw_calib_bypass(void);
 
 /*

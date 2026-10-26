@@ -8,25 +8,25 @@
  *   4. Show a CFW banner  : prove the CFW is running, not stock firmware
  *   5. Main loop          : button scan + waveform hook (stubs)
  *
- * CFW feature stubs (to be filled in by the full build):
+ * CFW features:
  *   - cfw_usb_stub        : replace stock USB enumeration with a custom
- *     vendor-class handler (USB ISR override in cfw_vectors.S)
- *   - cfw_hold_trigger    : detect the "HOLD" button long-press to
- *     freeze the trace (the stock firmware's HOLD feature)
+ *     vendor-class handler (USB ISR override in cfw_vectors.S). Stub.
+ *   - cfw_hold_trigger    : detect the "HOLD" button press and freeze the
+ *     trace (implemented, debounced in hold_trigger.c against SysTick).
  *   - cfw_calib_bypass    : disable the stock auto-calibration that
- *     zeroes the channel on boot (a known DSO152 quirk)
+ *     zeroes the channel on boot (a known DSO152 quirk). Stub.
  */
 #include "ch32.h"
 #include "lcd_st7789.h"
 #include "buttons.h"
 #include "cfw_main.h"
+#include "hold_trigger.h"
 
 extern void system_init(void);
 extern void cfw_redirect_vectors(void);
 
 /* Stub entry points (declared in cfw_main.h) */
 void cfw_usb_stub(void);
-void cfw_hold_trigger(void);
 void cfw_calib_bypass(void);
 
 /* ------------------------------------------------------------------ */
@@ -105,16 +105,33 @@ void cfw_main(void)
    */
   lcd_draw_string(10, 10, "CFW v0.1 - Sapiens", LCD_C_BLACK, LCD_C_GREEN);
 
-  /* 7. Main loop — time-based cadence via the SysTick. A full build
-   *    uses cfw_tick_ms()/cfw_delay_ms() to schedule scope work (waveform
-   *    capture, UI refresh) on a 1 ms base; the button hook below will
-   *    fire scope actions the moment a press is detected. */
+  /* 7. Main loop — time-based cadence via the SysTick. The HOLD button
+   *    is polled each iteration through cfw_hold_trigger_poll(); while
+   *    the trace is frozen we skip waveform refresh so the display holds
+   *    the last captured trace. A full build gates the real ADC capture
+   *    + lcd_draw_waveform() on cfw_hold_active(). */
+  static uint8_t s_hold_indicator_drawn;
   for (;;)
   {
     uint16_t btns = cfw_button_scan();
-    if (btns) {
-      /* Full build: map button -> scope action (HOLD, TRIGGER, etc.) */
+    cfw_hold_trigger_poll(btns);
+
+    if (cfw_hold_active()) {
+      /* Trace frozen: show the HOLD indicator once, then hold the screen. */
+      if (!s_hold_indicator_drawn) {
+        lcd_draw_string(240 - 72, 10, "HOLD", LCD_C_BLACK, LCD_C_RED);
+        s_hold_indicator_drawn = 1;
+      }
+      continue;
     }
-    /* Full build: trigger an ADC capture and lcd_draw_waveform() */
+
+    if (s_hold_indicator_drawn) {
+      /* HOLD released: clear the indicator, resume live refresh. */
+      lcd_draw_string(240 - 72, 10, "    ", LCD_C_BLACK, LCD_C_BLACK);
+      s_hold_indicator_drawn = 0;
+    }
+
+    /* Live mode: full build triggers an ADC capture here and calls
+     * lcd_draw_waveform(). Skipped while HOLD is active above. */
   }
 }

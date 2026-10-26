@@ -49,10 +49,6 @@ void cfw_usb_stub(void)
   /* p[0x44/4] |= USB_EN;  -- left as a TODO */
 }
 
-/* HOLD trigger: detect the HOLD button and freeze the trace.
- * Stub — a full build wires cfw_button_scan() -> hold_state. */
-void cfw_hold_trigger(void) { /* TODO */ }
-
 /* Calibration bypass: the stock firmware does an auto-cal that zeroes
  * the channels on boot. The CFW skips it so the user sees the real
  * trace immediately. Stub. */
