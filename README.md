@@ -17,7 +17,7 @@
   <img src="assets/banner.jpg" alt="DSO152 CFW banner" width="100%">
 </p>
 
-**Status:** RE in progress · Firmware: `V0.1` (39.5 KB partial .bin) · Toolchain: GNU ARM 13.3
+**Status:** RE in progress · Stock: `V0.1` (39.5 KB partial .bin) · CFW skeleton builds to **1.6 KB** (< 48 KB budget) · Toolchain: GNU ARM 13.3
 
 ---
 
@@ -25,13 +25,17 @@
 
 The stock DSO152 firmware is a 39.5 KB partial image of the full 64 KB flash. This project reverse-engineers that image (vector table, IRQs, peripheral map, string inventory, disassembly) to identify concrete patch points for a community CFW:
 
-| CFW Goal | Where |
-|---|---|
-| USB data logging | `0x0800B60C` (outside this .bin — needs full flash) |
-| HOLD trigger mode | Trigger state machine |
-| 1000 V range + 1 ms timebase | Menu string / time-base tables |
-| RDP unlock + reflash | Option bytes `0x1FFFF800` |
-| Calibration bypass | Reset handler @ `0x08003DD4` |
+| CFW Goal | Where | CFW Status |
+|---|---|---|
+| ST7789 LCD driver (register-level port of dso152tft.h) | `firmware/cfw/src/lcd_st7789.c` | ✅ implemented |
+| 1 ms SysTick time base + vector-table redirect | `cfw_main.c` / `cfw_vectors.S` | ✅ implemented |
+| HOLD trigger mode (trace freeze) | `hold_trigger.c` debounced state machine | ✅ implemented (placeholder button) |
+| Boot banner + main-loop button/hold scaffold | `cfw_main.c` | ✅ implemented |
+| 4×4 button ADC matrix scan (real button map) | `buttons.c` `cfw_button_scan()` | ⚠ placeholder (2 game pins) |
+| USB data logging | `0x0800B60C` (outside this .bin — needs full flash) | 🔌 stub |
+| 1000 V range + 1 ms timebase | Menu string / time-base tables | 📝 TODO |
+| RDP unlock + reflash | Option bytes `0x1FFFF800` | 📝 TODO |
+| Calibration bypass | Reset handler @ `0x08003DD4` | 🔌 stub |
 
 ---
 
@@ -42,22 +46,32 @@ firmware/
 ├── original_firmware/
 │   └── DSO152_APP_V0.1.bin        # 39,532-byte partial stock image
 │
-���── analysis/                      # All RE findings
-│   ├── vector-table.txt            # 64-entry decoded table + Thumb-flag decode
-│   ├── vector-bounds.txt           # In-range / out-of-range handler check
-│   ├── periph-scan.txt             # 105 peripheral-base references
-│   ├── strings-filtered.txt        # 118 meaningful strings
-│   ├── peripheral-map.md           # GPIO / ADC / DMA / RCC / USB / LCD pin map
-│   ├── firmware-flow.md            # Binary layout + IRQ analysis + CFW targets
-│   ├── cfw-targets.md              # Concrete patch address register
-│   └── irq-handlers.asm            # Active IRQ disassembly (SysTick, EXTI5/6…)
+├── re/                            # All reverse-engineering findings
+│   ├── analysis/
+│   │   ├── vector-table.txt         # 64-entry decoded table + Thumb-flag decode
+│   │   ├── vector-bounds.txt        # In-range / out-of-range handler check
+│   │   ├── periph-scan.txt          # 105 peripheral-base references
+│   │   ├── strings-filtered.txt     # 118 meaningful strings
+│   │   ├── peripheral-map.md        # GPIO / ADC / DMA / RCC / USB / LCD pin map
+│   │   ├── firmware-flow.md         # Binary layout + IRQ analysis + CFW targets
+│   │   ├── cfw-targets.md           # Concrete patch address register
+│   │   └── irq-handlers.asm         # Active IRQ disassembly (SysTick, EXTI5/6…)
+│   ├── disasm/
+│   │   ├── full-thumb-objdump.asm   # 1.26 MB full Thumb disassembly
+│   │   ├── reset-handler.asm        # Reset/vector bootstrap disassembly
+│   │   └── vectors-reset.asm
+│   └── scripts/                     # PowerShell + objdump tooling
+│       ├── vt.ps1                   # Vector table decoder
+│       └── vecbounds.ps1           # Handler range validator
 │
-├── disasm/
-│   └── full-thumb-objdump.asm      # 1.26 MB full Thumb disassembly
-│
-└── scripts/                       # PowerShell + objdump tooling
-    ├── vt.ps1                     # Vector table decoder
-    └── vecbounds.ps1              # Handler range validator
+└── cfw/                           # The custom-firmware skeleton (builds to ~1.6 KB)
+    ├── src/                          # system_ch32, cfw_init, cfw_main, cfw_vectors.S,
+    │                                 # lcd_st7789, hold_trigger, buttons, font5x8, usb_stub
+    ├── inc/                          # headers incl. ch32.h CH32F103 register defs
+    ├── link/cfw.ld                   # RAM-flash linker script (CFW budget 48 KB)
+    ├── build.ps1                     # Windows build → out/cfw.bin
+    ├── Makefile                      # cross-platform make equivalent
+    └── ref/                          # dso152tft.h + breakout.ino reference drivers
 ```
 
 ---
