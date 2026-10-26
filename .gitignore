@@ -1,0 +1,6 @@
+# Build artifacts — keep VCS clean; out/ is produced by build.ps1
+firmware/cfw/out/
+*.o
+*.elf
+*.bin
+*.map
