@@ -1,6 +1,21 @@
-# <img src="" alt="" width="0"> FNIRSI-DSO152-CFW
+# FNIRSI-DSO152-CFW
 
 > **Custom firmware + reverse-engineering toolkit** for the FNIRSI DSO152 70 MHz / 10 MSa/s pocket oscilloscope — CH32F103C8T6 (48 MHz Cortex-M3, 64 KB flash, 20 KB RAM)
+
+<p align="center">
+  <img src="https://img.shields.io/badge/MCU-CH32F103C8T6-2c2c54?style=flat-square" alt="MCU: CH32F103C8T6" />
+  <img src="https://img.shields.io/badge/Clock-48%20MHz-6e30cb?style=flat-square" alt="48 MHz" />
+  <img src="https://img.shields.io/badge/Flash-64%20KB-d4a53a?style=flat-square" alt="64 KB flash" />
+  <img src="https://img.shields.io/badge/RAM-20%20KB-41b35f?style=flat-square" alt="20 KB RAM" />
+  <img src="https://img.shields.io/badge/Firmware-V0.1-ff6b35?style=flat-square" alt="Stock firmware V0.1" />
+  <img src="https://img.shields.io/badge/RE-in%20progress-9b59b6?style=flat-square" alt="Status: RE in progress" />
+  <img src="https://img.shields.io/badge/CFW-skeleton-8e44ad?style=flat-square" alt="CFW: skeleton" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-research%20use-007ec6?style=flat-square" alt="License" /></a>
+</p>
+
+<p align="center">
+  <img src="assets/banner.jpg" alt="DSO152 CFW banner" width="100%">
+</p>
 
 **Status:** RE in progress · Firmware: `V0.1` (39.5 KB partial .bin) · Toolchain: GNU ARM 13.3
 
