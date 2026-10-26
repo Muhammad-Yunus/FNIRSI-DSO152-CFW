@@ -199,6 +199,12 @@ typedef struct {
 #define SysTick_CTRL_TICKINT        (1u << 1)
 #define SysTick_CTRL_COUNTFLAG      (1u << 2)
 
+/* Core clock. The CH32F103C8 runs HCLK/SYSCLK at 72 MHz (HSE 8 MHz x 9,
+ * see system_ch32.c). On Cortex-M3 the SysTick runs off HCLK directly, so
+ * a 1 ms reload value is (HCLK/1000) - 1 = 71999. */
+#define CFW_HCLK_HZ        72000000u
+#define CFW_SYSTICK_1MS    (CFW_HCLK_HZ / 1000u - 1u) /* 71999 */
+
 /* CH32 external IRQ numbers (vector index - 16 for external) */
 enum {
   WWDG_IRQn         = 0,
