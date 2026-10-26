@@ -11,7 +11,7 @@
     .type  cfv_vector_table, %object
 
 cfv_vector_table:
-    .word  0x20002000          /* 0: initial SP = top of 8KB SRAM */
+    .word  0x20005000          /* 0: initial SP = top of 20KB SRAM */
     .word  Reset_Handler       /* 1: reset */
     .word  NMI_Handler
     .word  HardFault_Handler

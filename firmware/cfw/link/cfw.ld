@@ -3,7 +3,7 @@
  *
  * CH32F103C8T6 memory layout:
  *   FLASH: 0x08000000 .. 0x0800FFFF  (64 KB)
- *   SRAM : 0x20000000 .. 0x20001FFF  (8 KB)
+ *   SRAM : 0x20000000 .. 0x20004FFF  (20 KB)
  *
  * Boot: the vector table lives at 0x08000000 (.cfv_vector_table).
  * _estack / _estack_start bound the 256-byte stack at the top of SRAM.
@@ -11,17 +11,19 @@
 MEMORY
 {
   FLASH (rx)  : ORIGIN = 0x08000000, LENGTH = 64K
-  SRAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 8K
+  SRAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 20K
 }
 
 ENTRY(Reset_Handler)
 
 SECTIONS
 {
-  /* Vector table at the very start of FLASH (CPU boots here). */
-  .cfv_vector_table : {
+  /* Vector table at the very start of FLASH (CPU boots here).
+   * KEEP() on the input wildcard: otherwise -Wl,--gc-sections drops
+   * .cfv_vector_table because nothing references it by symbol. */
+  .vectors : {
     . = ALIGN(4);
-    *(.cfv_vector_table)
+    KEEP(*(.cfv_vector_table))
     . = ALIGN(4);
   } > FLASH
 

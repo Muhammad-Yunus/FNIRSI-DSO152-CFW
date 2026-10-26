@@ -24,7 +24,9 @@ Option Bytes: 0x1FFFF800
 ```c
 // Enable USB peripheral
 RCC_APB2ENR |= (1 << 14);   // USB clock enable
-// USB base: 0x40007800
+// USB base: 0x50000000  (WCH CH32 USBFS — confirmed: original .bin data pool
+// references 0x5000F44F x3 in periph-scan.txt; NOT 0x40007800, that was a
+// STM32-style guess. The WCH CH32 maps USBFS at 0x50000000.)
 
 // Enable UART1 for VGA debug log (if using USART)
 RCC_APB2ENR |= (1 << 2);    // USART1
